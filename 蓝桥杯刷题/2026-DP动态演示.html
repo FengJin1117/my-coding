@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026 的出现次数 · DP 逐步演示</title>
+<style>
+:root{color-scheme:light;--ink:#162a43;--muted:#53677e;--line:#dce4ee;--blue:#175bca;--green:#08775d;--orange:#a44704}
+*{box-sizing:border-box}body{margin:0;background:#f2f6fc;color:var(--ink);font:16px/1.65 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}main{max-width:1280px;margin:auto;padding:28px 24px 50px}h1{font-size:28px;letter-spacing:-.6px;margin:0 0 6px}h2{font-size:19px;margin:0 0 12px}h3{font-size:16px;margin:12px 0 4px}p{margin:6px 0 12px}.muted{color:var(--muted)}.intro{max-width:900px}code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}code{color:#174c90}button,select,input{font:inherit}button,select{border:1px solid #bdcce0;border-radius:8px;padding:8px 13px;background:white;color:var(--ink)}button{cursor:pointer}button:hover:not(:disabled){background:#eaf1fd}button:disabled{opacity:.4;cursor:default}button.primary{background:var(--blue);border-color:var(--blue);color:white}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #efad37;outline-offset:3px}.panel{background:white;border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:18px}.strip{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.char{min-width:49px;text-align:center;padding:5px 9px;background:#edf2f8;border:2px solid transparent;border-radius:8px}.char b{display:block;font:600 24px ui-monospace,monospace}.char small{display:block;color:var(--muted);font-size:12px}.char.done{background:#e3eefb}.char.active{border-color:var(--orange);background:#fff0de}.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:15px}.progress{display:flex;gap:15px;align-items:center;margin-top:13px}.progress input{flex:1;min-width:80px;accent-color:var(--blue)}.progress span{min-width:110px;font-size:14px}.grid{display:grid;grid-template-columns:minmax(440px,1fr) minmax(340px,.94fr);gap:18px;align-items:start}.grid>.panel{margin-top:18px}.tablewrap{overflow:auto}table{width:100%;border-collapse:separate;border-spacing:4px;text-align:center;font-size:15px}th{font-weight:500;color:var(--muted);padding:4px}th small{display:block;font-size:13px}td{padding:0}td.rowlabel{font:14px ui-monospace,monospace;white-space:nowrap;padding:0 5px;text-align:left}td button{width:100%;padding:4px 10px;border:2px solid transparent;background:#edf2f8;font:600 19px/1.5 ui-monospace,monospace;border-radius:6px}td button.unreachable{color:#8796a8;font-weight:400}td button.source{border-color:var(--blue);background:#e5efff}td button.target{border-color:var(--orange);background:#fff0de}td button.changed{animation:pulse .7s ease-out}tr.current .rowlabel{color:var(--blue);font-weight:bold}.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;margin:10px 0}.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}.blue{background:var(--blue)}.orange{background:var(--orange)}.event{min-height:305px}.badge{display:inline-block;padding:3px 9px;background:#e7effc;color:#154d9a;border-radius:5px;font-size:14px;margin-bottom:8px}.equation{font:600 19px/1.9 ui-monospace,monospace;background:#eff4fb;padding:12px;border-radius:8px;overflow-wrap:anywhere;margin:12px 0}.flow{padding:10px 12px;border-left:3px solid var(--blue);background:#f4f8fe}.gain{color:var(--green);font-weight:650}.peek{border-top:1px solid var(--line);padding-top:12px;margin-top:16px;min-height:110px}.peek .mono{overflow-wrap:anywhere}.hint{font-size:14px;color:var(--muted)}.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.rules p{margin-bottom:0}details{margin-top:16px}summary{cursor:pointer;font-weight:600}pre{background:#14263c;color:#dfebfb;overflow:auto;padding:16px;border-radius:8px;font-size:14px;line-height:1.8}.finalpath{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:ui-monospace,monospace}.chunk{padding:6px 12px;border-radius:6px;background:#e6f4ef;color:#07634d}.replace{background:#fff0de;color:var(--orange)}@keyframes pulse{0%{box-shadow:0 0 0 4px #ffbe66}100%{box-shadow:0 0 0 0 transparent}}@media(max-width:900px){.grid{grid-template-columns:1fr}.rules{grid-template-columns:1fr;gap:8px}.event{min-height:0}}@media(max-width:500px){main{padding:18px 10px}h1{font-size:24px}.panel{padding:14px}.char{min-width:39px;padding:4px 6px}.strip{gap:4px}td button{padding:5px}table{border-spacing:2px}.controls button{padding:8px 10px}}
+</style>
+</head>
+<body>
+<main>
+<h1>2026 的出现次数 <span class="muted">/ DP 逐步演示</span></h1>
+<p class="intro">输入 <code>2026202202</code>。每一步只执行参考代码中的一次 <code>max</code> 更新。先点「下一步」，观察：<strong>从哪个格子出发，把哪个格子更新成了多少。</strong></p>
+<section class="panel">
+<div><strong>原字符串</strong> <span class="hint">下标从 0 开始；蓝底是已处理前缀，橙框是本次消耗的字符。</span></div>
+<div class="strip" id="input"></div>
+<div class="controls">
+<button id="reset">重置</button><button id="prev">上一步</button><button id="play" class="primary">自动播放</button><button id="next" class="primary">下一步 →</button><button id="key">跳到关键替换</button><button id="end">查看结果</button>
+<label for="speed" class="hint">速度</label><select id="speed"><option value="2200">慢速</option><option value="1200">正常</option><option value="600">快速</option></select>
+</div>
+<div class="progress"><input id="seek" type="range" min="0" value="0" aria-label="DP 演示进度"><span id="counter"></span></div>
+</section>
+<div class="grid">
+<section class="panel">
+<h2>dp[i][state] 的实时值</h2>
+<p class="hint"><strong>行 i：</strong>已处理原串前 i 个字符。<strong>列 state：</strong>生成串末尾的匹配状态。<br><strong>格子里的数：</strong>该条件下，已形成的 2026 的最多次数。<br>−∞ 表示还没有方案到达；0 表示能到达，但尚未形成 2026。</p>
+<div class="tablewrap"><table><thead><tr><th>已处理 i</th><th>state 0<small>无匹配</small></th><th>state 1<small>末尾 2</small></th><th>state 2<small>末尾 20</small></th><th>state 3<small>末尾 202</small></th></tr></thead><tbody id="dp"></tbody></table></div>
+<div class="legend"><span><i class="dot blue"></i>来源格子</span><span><i class="dot orange"></i>本次更新的目标格子</span></div>
+<p class="hint">点击任意格子，查看一种达到这个值的实际字符串。未来行可能提前有值，因为替换一次会消耗 3 个原字符。</p>
+</section>
+<section class="panel">
+<div class="event" id="event" aria-live="polite"></div>
+<div class="peek" id="peek"></div>
+</section>
+</div>
+<section class="panel">
+<h2>核心原理：保留不同的“结尾”，合并等价的方案</h2>
+<div class="rules">
+<div><h3>① 为什么要有四列？</h3><p>只记出现次数不够。结尾是 <code>202</code> 的方案，下一次加 <code>6</code> 就能得分；结尾是 <code>2</code> 的方案则不能。四列保留四种不同的后续机会。</p></div>
+<div><h3>② 为什么同一个格子取 max？</h3><p>到达同一个 <code>(i, state)</code>，剩余原串相同，结尾的匹配情况也相同。以后能增加的次数相同，所以只需保留当前次数最多的方案。</p></div>
+<div><h3>③ 为什么不用保存整个生成串？</h3><p>判断下一个字符能否补出 <code>2026</code>，只需知道末尾匹配到 <code>2 / 20 / 202</code> 的哪一步。页面显示生成串是为了帮助理解；原代码只保存次数。</p></div>
+</div>
+<details><summary>查看状态转移表与对应代码</summary>
+<p>state 是“生成串的最长后缀，同时也是 2026 的前缀”的长度。无匹配不等于生成串为空。匹配完整的 2026 时计数 +1，状态回到 0。</p>
+<table><thead><tr><th>旧状态</th><th>加入 0</th><th>加入 2</th><th>加入 6</th></tr></thead><tbody><tr><th>0 · 无匹配</th><td>0</td><td>1</td><td>0</td></tr><tr><th>1 · 2</th><td>2</td><td>1</td><td>0</td></tr><tr><th>2 · 20</th><td>0</td><td>3</td><td>0</td></tr><tr><th>3 · 202</th><td>2</td><td>1</td><td class="gain">0，次数 +1</td></tr></tbody></table>
+<pre>dp[0][0] = 0  # 其他格子初始化为 −∞
+for i in range(n):
+    for state in range(4):
+        if dp[i][state] == NEG:
+            continue
+        # 保留：消耗 1 个原字符，输出 s[i]
+        new_state, add = trans[state][s[i]]
+        dp[i+1][new_state] = max(dp[i+1][new_state], dp[i][state] + add)
+        # 替换：消耗 3 个原字符，输出一个 6
+        if s[i:i+3] == "202":
+            new_state, add = trans[state]['6']
+            dp[i+3][new_state] = max(dp[i+3][new_state], dp[i][state] + add)
+answer = max(dp[n])</pre>
+<p class="hint">为什么只检查原串的 202？替换只会产生 6，而 202 不含 6；跨越替换位置的子串一定含有 6，所以替换不会制造新的可替换 202。</p>
+</details>
+</section>
+</main>
+<script>
+'use strict';
+const S='2026202202', N=S.length;
+const trans=[{'0':[0,0],'2':[1,0],'6':[0,0]},{'0':[2,0],'2':[1,0],'6':[0,0]},{'0':[0,0],'2':[3,0],'6':[0,0]},{'0':[2,0],'2':[1,0],'6':[0,1]}];
+const names=['无匹配','末尾匹配 2','末尾匹配 20','末尾匹配 202'];
+const fmt=v=>v===-Infinity?'−∞':String(v);
+const copy=a=>a.map(r=>r.slice());
+// 按参考代码的 i → state → 保留 / 替换顺序记录快照。
+function buildFrames(){
+ const dp=Array.from({length:N+1},()=>Array(4).fill(-Infinity));
+ const paths=Array.from({length:N+1},()=>Array(4).fill(null));
+ dp[0][0]=0;paths[0][0]='';
+ const frames=[{kind:'init',dp:copy(dp),paths:copy(paths)}];
+ for(let i=0;i<N;i++)for(let state=0;state<4;state++){
+  if(dp[i][state]===-Infinity)continue;
+  const options=[{consume:1,char:S[i],kind:'keep'}];
+  if(S.slice(i,i+3)==='202')options.push({consume:3,char:'6',kind:'replace'});
+  for(const op of options){
+   const [ns,add]=trans[state][op.char],to=i+op.consume;
+   const old=dp[to][ns],source=dp[i][state],candidate=source+add;
+   const sourcePath=paths[i][state],candidatePath=sourcePath+op.char;
+   if(candidate>old){dp[to][ns]=candidate;paths[to][ns]=candidatePath;}
+   frames.push({...op,i,state,ns,add,to,old,source,candidate,sourcePath,candidatePath,changed:candidate>old,dp:copy(dp),paths:copy(paths)});
+  }
+ }
+ frames.push({kind:'end',dp:copy(dp),paths:copy(paths)});
+ return frames;
+}
+const frames=buildFrames();let index=0,timer=null,selected=[0,0];
+const $=id=>document.getElementById(id);
+function describeCell(){
+ const f=frames[index],[i,j]=selected,v=f.dp[i][j],path=f.paths[i][j];
+ $('peek').innerHTML=`<h3>格子 dp[${i}][${j}] = ${fmt(v)}</h3>`+(v===-Infinity?'<p>到当前演示步骤，还没有方案到达这里。</p>':`<p>已经消耗前 <strong>${i}</strong> 个原字符：<span class="mono">${S.slice(0,i)||'（空）'}</span><br>一种最优生成串：<strong class="mono">${path||'（空串）'}</strong><br>已形成 <strong>${v}</strong> 个 2026；${names[j]}。</p>`);
+}
+function render(){
+ const f=frames[index],active=f.kind==='keep'||f.kind==='replace';
+ $('input').innerHTML=[...S].map((c,k)=>`<div class="char ${k<(active?f.i:f.kind==='end'?N:0)?'done':''} ${active&&k>=f.i&&k<f.to?'active':''}"><b>${c}</b><small>${k}</small></div>`).join('');
+ $('dp').innerHTML=f.dp.map((row,i)=>`<tr class="${active&&i===f.i?'current':''}"><td class="rowlabel">i = ${i}</td>${row.map((v,j)=>`<td><button data-i="${i}" data-j="${j}" aria-label="dp[${i}][${j}]，值 ${fmt(v)}" class="${v===-Infinity?'unreachable ':''}${active&&i===f.i&&j===f.state?'source ':''}${active&&i===f.to&&j===f.ns?'target '+(f.changed?'changed':''):''}">${fmt(v)}</button></td>`).join('')}</tr>`).join('');
+ $('counter').textContent=`步骤 ${index} / ${frames.length-1}`;$('seek').value=index;
+ $('prev').disabled=index===0;$('reset').disabled=index===0;$('next').disabled=index===frames.length-1;
+ $('play').textContent=timer?'暂停':index===frames.length-1?'重新播放':'自动播放';
+ if(f.kind==='init'){
+  $('event').innerHTML='<span class="badge">初始化</span><h2>还没读字符：只有一个起点</h2><div class="equation">dp[0][0] = 0</div><p>处理了 0 个字符，生成串为空，状态是 0，出现次数也是 0。</p><p>其他格子都是 <strong>−∞</strong>，表示不可达。不能初始化为 0，否则就像凭空出现了“已经匹配到 202”的方案。</p><div class="flow">下一步：保留第一个 2，从 dp[0][0] 走到 dp[1][1]。</div>';
+ }else if(f.kind==='end'){
+  const answer=Math.max(...f.dp[N]);
+  $('event').innerHTML=`<span class="badge">扫描结束</span><h2>答案是 ${answer}，取最后一行的最大值</h2><div class="equation">max([${f.dp[N].map(fmt).join(', ')}]) = ${answer}</div><p>剩在什么匹配状态都可以，因此对最后一行的四个状态取最大值。</p><div class="finalpath"><span class="chunk">2026</span> + <span class="chunk">202</span> + <span class="chunk replace">202 → 6</span></div><p style="margin-top:12px">一种最优方案：只替换最后三个字符。</p><div class="equation">2026202202 → 2026 2026</div><p>注意：dp 的数值是出现次数，并不是方案数量。多条路径到同一格子时取 max，不是相加。</p>`;
+ }else{
+  const replacement=f.kind==='replace';
+  const outcome=f.changed?(f.old===-Infinity?'原来不可达，现在有方案到达。':'新方案更好，更新这个格子。'):f.candidate===f.old?'候选值相同，保留已有值即可。':'候选值更小，保留已有的更优值。';
+  $('event').innerHTML=`<span class="badge">i = ${f.i} · state = ${f.state} · ${replacement?'方案 2：替换':'方案 1：保留'}</span><h2>${replacement?'把原串的 202 整体变成一个 6':`保留原字符 ${f.char}，加入生成串`}</h2><p>从 <strong>dp[${f.i}][${f.state}] = ${f.source}</strong> 出发。<br>已经处理 ${f.i} 个原字符，${names[f.state]}。</p><div class="flow">消耗原串 <code>s[${f.i}:${f.to}] = ${S.slice(f.i,f.to)}</code>，输出 <code>${f.char}</code>。<br>行：${f.i} → <strong>${f.to}</strong>（消耗 ${f.consume} 个原字符）<br>列：${f.state} → <strong>${f.ns}</strong>（${names[f.ns]}）</div><div class="equation">dp[${f.to}][${f.ns}]<br>= max(${fmt(f.old)}, ${f.source} + ${f.add}) = ${fmt(f.dp[f.to][f.ns])}</div><p class="${f.add?'gain':''}">${f.add?'原结尾 202 + 新输出 6 = 2026，因此次数 +1。':`这次没有补出完整的 2026，次数 +0。`}</p><p>${outcome}</p><p class="hint">本次候选生成串：<span class="mono">${f.sourcePath||'（空）'} + ${f.char} → ${f.candidatePath}</span></p>${replacement?'<p class="hint">i 统计原串的消耗量，不是生成串长度。所以只输出一个 6，也必须向下跳 3 行。</p>':''}`;
+ }
+ describeCell();
+}
+function stop(){if(timer)clearInterval(timer);timer=null;}
+function move(n,manual=true){if(manual)stop();index=Math.max(0,Math.min(frames.length-1,n));const f=frames[index];selected=f.to!==undefined?[f.to,f.ns]:f.kind==='end'?[N,0]:[0,0];if(index===frames.length-1)stop();render();}
+function play(){timer=setInterval(()=>move(index+1,false),Number($('speed').value));render();}
+$('next').onclick=()=>move(index+1);$('prev').onclick=()=>move(index-1);$('reset').onclick=()=>move(0);$('end').onclick=()=>move(frames.length-1);
+$('key').onclick=()=>move(frames.findIndex(f=>f.kind==='replace'&&f.i===7&&f.state===3));
+$('play').onclick=()=>{if(timer){stop();render();}else{if(index===frames.length-1)move(0);play();}};
+$('speed').onchange=()=>{if(timer){stop();play();}};$('seek').max=frames.length-1;$('seek').oninput=e=>move(Number(e.target.value));
+$('dp').onclick=e=>{const b=e.target.closest('button[data-i]');if(b){selected=[Number(b.dataset.i),Number(b.dataset.j)];describeCell();}};
+document.addEventListener('keydown',e=>{if(['INPUT','SELECT','BUTTON'].includes(e.target.tagName))return;if(e.key==='ArrowRight'){e.preventDefault();move(index+1);}if(e.key==='ArrowLeft'){e.preventDefault();move(index-1);}});
+render();
+</script>
+</body>
+</html>

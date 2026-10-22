@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>华为 AI 岗笔试 · 20 题模拟练习</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --text: #20242b;
+      --muted: #707782;
+      --line: #e5e8ec;
+      --primary: #2f6fed;
+      --primary-soft: #edf3ff;
+      --good: #218c5b;
+      --good-soft: #eaf8f1;
+      --warn: #b7791f;
+      --warn-soft: #fff7df;
+      --bad: #c64747;
+      --bad-soft: #fff0f0;
+      --shadow: 0 10px 32px rgba(24, 35, 52, .07);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      line-height: 1.65;
+    }
+    button { font: inherit; }
+    .shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+    .hero { padding: 62px 0 34px; }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    h1 { margin: 0; font-size: clamp(30px, 5vw, 52px); line-height: 1.15; letter-spacing: -.04em; }
+    .subtitle { max-width: 670px; margin: 16px 0 0; color: var(--muted); font-size: 16px; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 22px; }
+    .chip {
+      padding: 7px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.75);
+      color: #515966;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 24px; align-items: start; }
+    .panel, .question, .result-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .question { margin-bottom: 18px; padding: 25px; scroll-margin-top: 20px; transition: border .2s, transform .2s; }
+    .question:hover { transform: translateY(-1px); }
+    .question.unanswered { border-color: #e2a4a4; animation: shake .32s ease; }
+    .q-head { display: flex; gap: 14px; align-items: flex-start; }
+    .q-number {
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 900;
+    }
+    .q-copy { flex: 1; }
+    .q-topline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 4px; }
+    .kind, .category {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #f0f2f5;
+      color: #646c77;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .kind.multi { color: #7655c5; background: #f3efff; }
+    .q-title { margin: 0; font-size: 17px; font-weight: 750; }
+    .options { display: grid; gap: 10px; margin-top: 19px; }
+    .option {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      width: 100%;
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #fff;
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+    .option:hover { border-color: #a9c0f5; background: #f8faff; }
+    .option.selected { border-color: var(--primary); background: var(--primary-soft); }
+    .option.correct { border-color: #78c99f; background: var(--good-soft); }
+    .option.wrong { border-color: #e2a4a4; background: var(--bad-soft); }
+    .option:disabled { color: inherit; cursor: default; }
+    .letter {
+      display: grid;
+      flex: 0 0 auto;
+      place-items: center;
+      width: 27px;
+      height: 27px;
+      border: 1px solid #d9dee6;
+      border-radius: 9px;
+      color: #5c6570;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .selected .letter { border-color: var(--primary); color: #fff; background: var(--primary); }
+    .correct .letter { border-color: var(--good); color: #fff; background: var(--good); }
+    .wrong .letter { border-color: var(--bad); color: #fff; background: var(--bad); }
+    .explanation { display: none; margin-top: 18px; padding: 16px; border-radius: 13px; background: #f6f7f9; color: #505965; font-size: 14px; }
+    .explanation.show { display: block; animation: reveal .3s ease; }
+    .explanation strong { color: var(--text); }
+    .side { position: sticky; top: 20px; }
+    .panel { padding: 20px; }
+    .progress-label { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; font-weight: 700; }
+    .progress-track { height: 8px; margin: 10px 0 18px; overflow: hidden; border-radius: 999px; background: #edf0f3; }
+    .progress-bar { width: 0; height: 100%; border-radius: inherit; background: var(--primary); transition: width .28s ease; }
+    .navigator { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+    .nav-dot {
+      aspect-ratio: 1;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fff;
+      color: #747b84;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .nav-dot.answered { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
+    .nav-dot.correct { border-color: var(--good); color: var(--good); background: var(--good-soft); }
+    .nav-dot.wrong { border-color: var(--bad); color: var(--bad); background: var(--bad-soft); }
+    .cache-note { margin: 15px 0 0; color: var(--muted); font-size: 12px; text-align: center; }
+    .actions { display: grid; gap: 9px; margin-top: 18px; }
+    .btn { padding: 12px 16px; border: 0; border-radius: 12px; cursor: pointer; font-weight: 850; transition: .18s ease; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { color: #fff; background: var(--primary); box-shadow: 0 8px 20px rgba(47,111,237,.22); }
+    .btn-secondary { color: #505966; background: #eef1f4; }
+    .result-card { display: none; margin-bottom: 20px; padding: 30px; overflow: hidden; position: relative; }
+    .result-card.show { display: flex; gap: 25px; align-items: center; animation: resultIn .55s cubic-bezier(.2,.8,.2,1); }
+    .result-card.good { border-color: #9bd5b7; background: linear-gradient(135deg, #fff 45%, var(--good-soft)); }
+    .result-card.warn { border-color: #ead18c; background: linear-gradient(135deg, #fff 45%, var(--warn-soft)); }
+    .result-card.bad { border-color: #e2aeae; background: linear-gradient(135deg, #fff 45%, var(--bad-soft)); }
+    .face { font-size: 64px; line-height: 1; animation: bounce .7s .2s ease both; }
+    .score { margin: 2px 0 4px; font-size: 37px; line-height: 1; font-weight: 950; letter-spacing: -.04em; }
+    .result-title { margin: 0 0 8px; font-size: 21px; }
+    .result-copy { margin: 0; color: var(--muted); }
+    footer { padding: 28px 0 50px; color: #89909a; font-size: 12px; text-align: center; }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 26px;
+      z-index: 10;
+      padding: 11px 16px;
+      border-radius: 999px;
+      color: #fff;
+      background: #2a3038;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 12px);
+      transition: .22s ease;
+      font-size: 13px;
+      font-weight: 750;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    @keyframes reveal { from { opacity: 0; transform: translateY(-5px); } }
+    @keyframes resultIn { from { opacity: 0; transform: translateY(-16px) scale(.98); } }
+    @keyframes bounce { 0% { transform: scale(.6) rotate(-8deg); } 65% { transform: scale(1.12) rotate(3deg); } 100% { transform: scale(1); } }
+    @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+    @media (max-width: 850px) {
+      .hero { padding-top: 36px; }
+      .layout { display: flex; flex-direction: column-reverse; }
+      .side { position: static; width: 100%; }
+      .panel { padding: 16px; }
+      .navigator { grid-template-columns: repeat(10, 1fr); }
+      .actions { grid-template-columns: 1fr 1fr; }
+      .question { padding: 20px 17px; }
+    }
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 20px, 1120px); }
+      .navigator { grid-template-columns: repeat(5, 1fr); }
+      .result-card.show { align-items: flex-start; padding: 22px 18px; }
+      .face { font-size: 48px; }
+      .score { font-size: 30px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero shell">
+    <p class="eyebrow">Huawei AI Practice</p>
+    <h1>AI 岗笔试模拟练习</h1>
+    <p class="subtitle">20 道真实选择题，涵盖大模型、深度学习、机器学习与数学。选项会自动保存在本机，答完后提交即可查看成绩与解析。</p>
+    <div class="hero-meta">
+      <span class="chip">20 道题</span><span class="chip">15 单选 + 5 多选</span><span class="chip">自动缓存</span><span class="chip">提交后查看解析</span>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section id="result" class="result-card" aria-live="polite">
+      <div id="face" class="face"></div>
+      <div>
+        <p id="resultTitle" class="result-title"></p>
+        <div id="score" class="score"></div>
+        <p id="resultCopy" class="result-copy"></p>
+      </div>
+    </section>
+    <div class="layout">
+      <div id="questions"></div>
+      <aside class="side">
+        <div class="panel">
+          <div class="progress-label"><span>答题进度</span><span id="progressText">0 / 20</span></div>
+          <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+          <div id="navigator" class="navigator"></div>
+          <p id="cacheNote" class="cache-note">答案将自动保存在本机</p>
+          <div class="actions">
+            <button id="submitBtn" class="btn btn-primary">提交答案</button>
+            <button id="resetBtn" class="btn btn-secondary">重新作答</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+  <footer>题目来源：ai-20260422.md · 本页面仅在本机保存答题记录</footer>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const questions = [
+      {id:1,multi:false,q:"某运营商构建网络配置命令、设备运行日志、故障案例一体化检索系统，文本中包含大量命令行（如 display interface、ip route）、MAC/IP 地址、端口编号、VLAN ID、OID 等结构化内容。最合适的处理方式是？",o:["对命令行、IP、MAC、端口等增加专用词表，按命令块/日志条目切分，使用通信领域微调 Embedding","全部文本统一小写并去除符号，避免分词异常","直接按固定长度切分，使用通用分词与通用 Embedding","只使用关键词 BM25 检索，不使用 Embedding"],a:"A",c:"大模型 · RAG/检索增强",e:"通信领域文本包含大量专用术语，通用分词会将其错误拆分或忽略。应增加专用词表、按语义块切分，并使用领域微调 Embedding。去除符号会丢失 IP 等关键信息，固定长度切分会截断命令块，纯 BM25 也无法处理语义相似查询。"},
+      {id:2,multi:false,q:"在大模型指令微调实验中，研究人员对比了 3 种训练数据配比下的模型响应准确率，需直观展示不同配比的准确率差异并便于组间对比，最适合的可视化图表是？",o:["分组柱状图","雷达图","饼图","直方图"],a:"A",c:"机器学习 · 数据可视化",e:"分组柱状图最适合展示少量分类变量之间的数值对比。饼图适合展示占比，雷达图适合多维评估，直方图用于连续变量的频率分布。"},
+      {id:3,multi:false,q:"牛顿迭代法的迭代公式为？",o:["xₙ₊₁ = xₙ − f(xₙ) / f′(xₙ)","xₙ₊₁ = xₙ − f(xₙ)","xₙ₊₁ = xₙ + f(xₙ) / f′(xₙ)","xₙ₊₁ = f′(xₙ) / f(xₙ)"],a:"A",c:"数学 · 数值计算",e:"牛顿迭代法通过在当前点做切线逼近零点，令切线方程的 y = 0，可解出 xₙ₊₁ = xₙ − f(xₙ) / f′(xₙ)。"},
+      {id:4,multi:false,q:"张量并行（TP）主要用于解决单卡显存无法容纳单个模型层权重的问题，其切分逻辑是？",o:["按优化器状态切分，不同 GPU 维护不同的优化器状态","按网络层深度切分，不同层放在不同 GPU 上","按批次大小切分，不同样本放在不同 GPU 上","按矩阵运算的维度切分，同一层内的权重被拆分到不同 GPU 上"],a:"D",c:"大模型 · 分布式训练",e:"张量并行的核心是将同一层的权重矩阵按行或列维度切分到多个 GPU。A 是 ZeRO，B 是流水线并行，C 是数据并行。"},
+      {id:5,multi:false,q:"下列哪个矩阵一定是可逆的？",o:["对称矩阵","行列式为零的矩阵","单位矩阵","所有元素都为零的矩阵"],a:"C",c:"数学 · 线性代数",e:"单位矩阵 I 的行列式为 1，且 I⁻¹ = I，因此一定可逆。对称矩阵不一定可逆；行列式为零的矩阵和零矩阵均不可逆。"},
+      {id:6,multi:false,q:"在多轮对话推理系统中，如果 GPU/NPU 显存已满但仍有新的 token 需要生成，系统通常采用什么策略？",o:["将部分 KV Cache swap 到 CPU 或进行 recomputation","自动降低模型精度","重启服务器","直接杀掉进程"],a:"A",c:"大模型 · 推理优化",e:"vLLM 等推理引擎在显存不足时，会将低优先级请求的 KV Cache 换出到 CPU，或在需要时重新计算。"},
+      {id:7,multi:false,q:"在部署阶段，将卷积层（Conv）与批归一化层（BN）进行融合（Folding）。以下描述中最准确的是？",o:["融合是为了让 BN 的梯度能更快反向传播到 Conv 层，从而加速推理","融合是纯代数等价变换，在编译期将 BN 的缩放和偏移参数吸收到 Conv 的权重和偏置中，运行时没有 BN 开销","融合是在运行时将 BN 的均值和方差传入 Conv 的底层算子中并行计算","融合会轻微改变模型输出精度，因为融合后的算子无法使用 Tensor Core 加速"],a:"B",c:"深度学习 · 模型部署",e:"Conv+BN 融合在编译期完成，将 BN 参数代数合并到 Conv 权重和偏置中，推理时仅执行一次卷积，消除 BN 的额外计算与显存开销。"},
+      {id:8,multi:false,q:"在流水线并行（Pipeline Parallel）中，某些 GPU 等待上游 Stage 计算结果时出现空闲，这种现象被称为？",o:["Pipeline Bubble","显存碎片","GPU Context Switch","网络拥塞"],a:"A",c:"大模型 · 分布式训练",e:"Pipeline Bubble 指各 Stage 之间因数据依赖产生的 GPU 空闲。micro-batch 切分、1F1B 调度等方法可以减小 bubble 比例。"},
+      {id:9,multi:false,q:"在层次聚类分析（HAC）中，以下哪一种方法是用于定义簇间距离的常见方式？",o:["Expectation-Maximization","K-means","DBSCAN","Complete Linkage"],a:"D",c:"机器学习 · 聚类",e:"Complete Linkage 是层次聚类定义簇间距离的标准方法之一，取两个簇中最远点对的距离作为簇间距离。"},
+      {id:10,multi:false,q:"某多分类任务中，类别 A 有 1000 个样本，类别 B 有 10 个样本。若使用 Micro-F1 计算，主要反映的是哪个类别的性能？",o:["两者权重相同","取决于具体的 F1 计算公式","类别 B","类别 A"],a:"D",c:"机器学习 · 评价指标",e:"Micro-F1 汇总所有类别的 TP/FP/FN 后统一计算，样本数多的类别贡献更大，因此主要反映类别 A 的性能。"},
+      {id:11,multi:false,q:"在 PyTorch 中，以下哪个函数用于执行优化器的一步更新？",o:["optimizer.zero_grad()","optimizer.backward()","optimizer.step()","optimizer.update()"],a:"C",c:"深度学习 · PyTorch",e:"PyTorch 常见训练流程是 optimizer.zero_grad() 清零梯度，loss.backward() 计算梯度，optimizer.step() 更新参数。"},
+      {id:12,multi:false,q:"工程师需要计算复杂函数在某区间上的定积分。以下关于蒙特卡洛积分与黎曼积分的对比，说法正确的是？",o:["蒙特卡洛积分仅适用于低维积分问题，高维时应使用黎曼积分","蒙特卡洛积分收敛速度为 O(N⁻²)，黎曼积分为 O(N⁻¹ᐟ²)","蒙特卡洛积分计算复杂度远低于黎曼积分，因此总是首选","蒙特卡洛积分收敛速度为 O(N⁻¹ᐟ²)，黎曼积分（等距划分）为 O(N⁻²)"],a:"D",c:"数学 · 数值计算",e:"蒙特卡洛积分基于大数定律，收敛速度为 O(N⁻¹ᐟ²)，且与维度无关；一维下复合梯形法可达到 O(N⁻²)，但高维时面临维度灾难。"},
+      {id:13,multi:false,q:"适合高维稀疏向量相似度计算的是？",o:["余弦相似度","切比雪夫距离","欧氏距离","曼哈顿距离"],a:"A",c:"机器学习 · 距离度量",e:"余弦相似度关注向量方向，不受向量模长与大量零值维度影响，是文本检索等高维稀疏场景的标准选择。"},
+      {id:14,multi:false,q:"Transformer 的编码器-解码器注意力（Encoder-Decoder Attention）中，查询（Query）来自哪里？",o:["输入序列","解码器的上一层输出","位置编码","编码器的输出"],a:"B",c:"深度学习 · Transformer",e:"Encoder-Decoder Attention 中，Query 来自解码器上一层输出，Key 和 Value 来自编码器最终输出。"},
+      {id:15,multi:false,q:"给定两个向量 a 和 b，它们的余弦相似度为？",o:["1.0","0.87","0.97","0.67"],a:"C",c:"数学 · 线性代数",e:"余弦相似度公式为 cosθ = (a · b) / (|a| · |b|)，代入原题给出的具体向量值得 0.97。"},
+      {id:16,multi:true,q:"多模态大模型中，常见的视觉-语言连接器（Connector）包括？",o:["MLP（多层感知机）","线性投影层（Linear Projection）","卷积池化层","Q-Former"],a:"ABD",c:"大模型 · 多模态",e:"LLaVA 使用 MLP；线性投影是最简单的连接方式；BLIP-2 使用 Q-Former。卷积池化层主要用于视觉编码器内部，并非主流视觉-语言连接器。"},
+      {id:17,multi:true,q:"适用于机器学习中度量两个特征向量相似度的有？",o:["欧氏距离","余弦相似度","汉明距离","KL 散度"],a:"ABC",c:"机器学习 · 距离度量",e:"欧氏距离、余弦相似度和汉明距离均可用于特征向量比较。KL 散度用于衡量两个概率分布之间的差异。"},
+      {id:18,multi:true,q:"设 X₁, X₂, …, Xₙ ~ N(μ, σ²)，下面正确的有？",o:["μ 的 MLE 是样本均值 X̄","μ 的 MLE 是无偏的","σ² 的 MLE 是 (1/n)Σ(Xᵢ − X̄)²","σ² 的 MLE 是无偏的"],a:"ABC",c:"数学 · 概率统计",e:"μ 的 MLE 是样本均值且无偏；σ² 的 MLE 分母为 n，但其期望为 ((n−1)/n)σ²，因此是有偏估计。"},
+      {id:19,multi:true,q:"以下关于反向传播计算效率的说法正确的是？",o:["反向传播的计算量大约是前向传播的 2 倍","符号微分跟数值微分在模型训练时只能使用其中一种","反向传播需要存储所有中间层的激活值，因此显存消耗大","相比于数值微分，符号微分计算梯度的速度快"],a:"AC",c:"深度学习 · 反向传播",e:"反向传播计算量经验上约为前向的 2 倍，并需要保存前向激活用于梯度计算。深度学习通常使用自动微分；符号微分还可能产生表达式膨胀。"},
+      {id:20,multi:true,q:"在线问答服务（vLLM）晚高峰出现：TTFT 从 0.9s 升至 2.4s，decode tokens/s 基本不变，平均输入长度从 700 升至 2200，GPU 利用率接近满载。可立即执行哪些动作？",o:["对超长输入先走“摘要压缩链路”，再送主模型","增大 temperature 到 1.2","把 max_new_tokens 从 512 调到 1024","开启/优化 prefix cache（固定 system prompt 场景）"],a:"AD",c:"大模型 · 推理优化",e:"TTFT 上升而 decode 速度不变，瓶颈在 prefill。摘要压缩能缩短输入；prefix cache 能复用固定 system prompt 的 KV Cache。temperature 与 max_new_tokens 均不能改善 TTFT。"}
+    ];
+
+    const letters = ["A", "B", "C", "D"];
+    const storageKey = "huawei-ai-quiz-20260422";
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey));
+        if (saved && saved.answers) return saved;
+      } catch (_) {}
+      return { answers: {}, submitted: false, showAnswers: false };
+    }
+
+    function saveState() {
+      localStorage.setItem(storageKey, JSON.stringify(state));
+      const note = document.getElementById("cacheNote");
+      note.textContent = "已自动保存 · " + new Date().toLocaleTimeString("zh-CN", {hour:"2-digit", minute:"2-digit"});
+    }
+
+    function sameAnswer(a = "", b = "") {
+      return [...a].sort().join("") === [...b].sort().join("");
+    }
+
+    function render() {
+      const wrap = document.getElementById("questions");
+      wrap.innerHTML = questions.map(item => {
+        const selected = state.answers[item.id] || "";
+        const options = item.o.map((text, index) => {
+          const letter = letters[index];
+          let cls = selected.includes(letter) ? " selected" : "";
+          if (state.submitted) {
+            cls = item.a.includes(letter) ? " correct" : selected.includes(letter) ? " wrong" : "";
+          }
+          return `<button class="option${cls}" data-q="${item.id}" data-a="${letter}" ${state.submitted ? "disabled" : ""}>
+            <span class="letter">${letter}</span><span>${text}</span>
+          </button>`;
+        }).join("");
+        return `<article class="question" id="q${item.id}">
+          <div class="q-head">
+            <div class="q-number">${item.id}</div>
+            <div class="q-copy">
+              <div class="q-topline"><span class="kind ${item.multi ? "multi" : ""}">${item.multi ? "多选题" : "单选题"}</span><span class="category">${item.c}</span></div>
+              <p class="q-title">${item.q}</p>
+            </div>
+          </div>
+          <div class="options">${options}</div>
+          <div class="explanation ${state.showAnswers ? "show" : ""}">
+            <strong>正确答案：${item.a.split("").join("、")}</strong><br>${item.e}
+          </div>
+        </article>`;
+      }).join("");
+
+      document.getElementById("navigator").innerHTML = questions.map(item => {
+        const has = Boolean(state.answers[item.id]);
+        const result = state.submitted ? (sameAnswer(state.answers[item.id], item.a) ? "correct" : "wrong") : has ? "answered" : "";
+        return `<button class="nav-dot ${result}" data-jump="${item.id}">${item.id}</button>`;
+      }).join("");
+
+      document.querySelectorAll(".option").forEach(btn => btn.addEventListener("click", choose));
+      document.querySelectorAll(".nav-dot").forEach(btn => btn.addEventListener("click", () => {
+        document.getElementById("q" + btn.dataset.jump).scrollIntoView({behavior:"smooth", block:"start"});
+      }));
+      updateProgress();
+      renderResult();
+    }
+
+    function choose(event) {
+      const id = Number(event.currentTarget.dataset.q);
+      const letter = event.currentTarget.dataset.a;
+      const item = questions[id - 1];
+      if (item.multi) {
+        const current = state.answers[id] || "";
+        state.answers[id] = current.includes(letter) ? current.replace(letter, "") : current + letter;
+        if (!state.answers[id]) delete state.answers[id];
+      } else {
+        state.answers[id] = letter;
+      }
+      saveState();
+      render();
+    }
+
+    function updateProgress() {
+      const count = questions.filter(item => state.answers[item.id]).length;
+      document.getElementById("progressText").textContent = `${count} / ${questions.length}`;
+      document.getElementById("progressBar").style.width = `${count / questions.length * 100}%`;
+      document.getElementById("submitBtn").textContent = state.submitted ? (state.showAnswers ? "收起答案解析" : "查看答案解析") : "提交答案";
+    }
+
+    function renderResult() {
+      const card = document.getElementById("result");
+      if (!state.submitted) {
+        card.className = "result-card";
+        return;
+      }
+      const score = questions.filter(item => sameAnswer(state.answers[item.id], item.a)).length;
+      const ratio = score / questions.length;
+      const level = ratio >= .8 ? "good" : ratio >= .6 ? "warn" : "bad";
+      const info = {
+        good: ["😊", "优秀，状态很稳", "基础扎实，继续保持这份判断力。"],
+        warn: ["🙂", "不错，再巩固一下", "已经掌握大部分知识点，看看解析补齐薄弱项。"],
+        bad: ["😔", "别灰心，正适合查漏补缺", "先查看答案解析，下一次会明显更顺手。"]
+      }[level];
+      card.className = `result-card show ${level}`;
+      document.getElementById("face").textContent = info[0];
+      document.getElementById("resultTitle").textContent = info[1];
+      document.getElementById("score").textContent = `${score} / ${questions.length}`;
+      document.getElementById("resultCopy").textContent = info[2];
+    }
+
+    function submit() {
+      if (state.submitted) {
+        state.showAnswers = !state.showAnswers;
+        saveState();
+        render();
+        if (state.showAnswers) showToast("已展开全部答案解析");
+        return;
+      }
+      const missing = questions.filter(item => !state.answers[item.id]);
+      if (missing.length) {
+        document.querySelectorAll(".question").forEach(el => el.classList.remove("unanswered"));
+        missing.forEach(item => document.getElementById("q" + item.id).classList.add("unanswered"));
+        document.getElementById("q" + missing[0].id).scrollIntoView({behavior:"smooth", block:"center"});
+        showToast(`还有 ${missing.length} 道题未作答`);
+        return;
+      }
+      state.submitted = true;
+      saveState();
+      render();
+      window.scrollTo({top: 0, behavior: "smooth"});
+    }
+
+    function reset() {
+      if (!confirm("确定清空当前答案并重新作答吗？")) return;
+      state = { answers: {}, submitted: false, showAnswers: false };
+      localStorage.removeItem(storageKey);
+      render();
+      window.scrollTo({top: 0, behavior: "smooth"});
+      showToast("已清空答题记录");
+    }
+
+    let toastTimer;
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    document.getElementById("submitBtn").addEventListener("click", submit);
+    document.getElementById("resetBtn").addEventListener("click", reset);
+    render();
+  </script>
+</body>
+</html>
